@@ -12,8 +12,10 @@ func InitializeRoutes(c *app.Config) *mux.Router {
 	mux := mux.NewRouter()
 	c.Router = mux
 
+	// Health check
 	mux.HandleFunc("/health-check", HealthCheckHandler).Methods("GET")
 
+	// API
 	apiRouter := mux.PathPrefix("/api/v1").Subrouter()
 	apiRouter.HandleFunc("/", ApiRootHandler).Methods("GET")
 
