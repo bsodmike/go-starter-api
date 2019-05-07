@@ -6,13 +6,16 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/bsodmike/go_starter_api/app"
+	"github.com/bsodmike/go_starter_api/routes"
 )
 
-var a App
+var config app.Config
 
 func TestMain(m *testing.M) {
-	a = App{}
-	a.Initialize()
+	config = app.Config{}
+	routes.InitializeRoutes(&config)
 
 	code := m.Run()
 	os.Exit(code)
@@ -20,7 +23,7 @@ func TestMain(m *testing.M) {
 
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	a.Router.ServeHTTP(rr, req)
+	config.Router.ServeHTTP(rr, req)
 
 	return rr
 }
