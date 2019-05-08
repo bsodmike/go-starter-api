@@ -5,5 +5,6 @@ import (
 )
 
 type Config struct {
-	Router *mux.Router
+	Router    *mux.Router
+	ApiRoutes *mux.Router
 }

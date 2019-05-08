@@ -8,27 +8,28 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func InitializeRoutes(c *app.Config) *mux.Router {
-	mux := mux.NewRouter()
-	c.Router = mux
+func InitializeRoutes(c *app.Config) {
+	router := mux.NewRouter()
+	apiRoutes := mux.NewRouter()
+
+	c.Router = router
+	c.ApiRoutes = apiRoutes
 
 	// Health check
-	mux.HandleFunc("/health-check", HealthCheckHandler).Methods("GET")
+	router.HandleFunc("/health-check", healthCheckHandler).Methods("GET")
 
 	// API
-	apiRouter := mux.PathPrefix("/api/v1").Subrouter()
-	apiRouter.HandleFunc("/", ApiRootHandler).Methods("GET")
-
-	return mux
+	apiRouter := apiRoutes.PathPrefix("/api/v1").Subrouter().StrictSlash(true)
+	apiRouter.HandleFunc("/", apiRootHandler).Methods("GET")
 }
 
-func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(map[string]bool{"alive": true})
 }
 
-func ApiRootHandler(w http.ResponseWriter, r *http.Request) {
+func apiRootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusForbidden)
 
