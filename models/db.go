@@ -1,29 +1,54 @@
 package models
 
 import (
+	"fmt"
+
 	gorm "github.com/jinzhu/gorm"
+
 	// postgress db driver
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // DB abstraction
 type DB struct {
-	*gorm.DB
+	gormDB  *gorm.DB
+	Source  string
+	LogMode bool
 }
 
-// NewPostgresDB - postgres database
-func NewPostgresDB(dataSourceName string) *DB {
+func (d *DB) connect() *DB {
+	gormDB, err := gorm.Open("postgres", d.Source)
 
-	db, err := gorm.Open("postgres", dataSourceName)
 	if err != nil {
 		panic(err)
 	}
 
-	if err = db.DB().Ping(); err != nil {
+	if err = gormDB.DB().Ping(); err != nil {
 		panic(err)
 	}
 
-	//db.LogMode(true)
+	if d.LogMode == true {
+		gormDB.LogMode(true)
+	}
 
-	return &DB{db}
+	fmt.Printf("Connected to %s DB %s\n",
+		gormDB.Dialect().GetName(), gormDB.Dialect().CurrentDatabase())
+
+	d.gormDB = gormDB
+	return d
+}
+
+// NewPostgresDB - postgres database
+func NewPostgresDB(db *DB) *DB {
+
+	db.connect()
+	defer db.gormDB.Close()
+
+	if !(db.gormDB.HasTable(&User{})) {
+		db.gormDB.CreateTable(&User{})
+	}
+
+	db.gormDB.AutoMigrate(&User{})
+
+	return db
 }

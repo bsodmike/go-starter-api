@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+
+  db:
+    container_name: pgdb
+    image: postgres
+    restart: always
+    ports:
+      - 9001:5432
+    volumes:
+      - ./pg-data:/var/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: dbuser
+      POSTGRES_DB: goapi
