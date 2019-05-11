@@ -29,6 +29,7 @@ func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 
 	return rr
 }
+
 func checkResponseCode(t *testing.T, expected, actual int) {
 	if expected != actual {
 		t.Errorf("Expected response code %d. Got %d\n", expected, actual)
@@ -54,17 +55,6 @@ func sanitizeString(s string) string {
 /*
 	TESTS
 */
-func TestAPIRoot(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/api/v1/", nil)
-	response := executeRequest(req)
-
-	checkResponseCode(t, http.StatusForbidden, response.Code)
-
-	body := response.Body.String()
-	if sanitizeString(body) != "{}" {
-		t.Errorf("Expected an empty JSON response. Got %s", body)
-	}
-}
 
 func TestHealthCheck(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/health-check", nil)
@@ -76,5 +66,29 @@ func TestHealthCheck(t *testing.T) {
 	body := response.Body.String()
 	if sanitizeString(body) != "{\"alive\":true}" {
 		t.Errorf("Expected a valid JSON response. Got %s", body)
+	}
+}
+
+func TestPublicAPIRoot(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/api/v1/", nil)
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusForbidden, response.Code)
+
+	body := response.Body.String()
+	if sanitizeString(body) != "{}" {
+		t.Errorf("Expected an empty JSON response. Got %s", body)
+	}
+}
+
+func TestSecuredAPIRoot(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/api/v1/secured/", nil)
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusUnauthorized, response.Code)
+
+	body := response.Body.String()
+	if sanitizeString(body) != "Required authorization token not found" {
+		t.Errorf("Expected JWT error. Got %s", body)
 	}
 }
