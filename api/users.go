@@ -10,13 +10,14 @@ import (
 	"github.com/bsodmike/go_starter_api/models"
 )
 
-// UserJSON - json data expected for login/signup
+// UserJSON - JSON data expected for login/signup
 type UserJSON struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+// Token - JSON data for JWT access token
 type Token struct {
 	AccessToken string `json:"access_token"`
 }
