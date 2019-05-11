@@ -10,6 +10,14 @@
   revision = "5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd"
 
 [[projects]]
+  digest = "1:78bf6c6a98a126bcec01b33e0b1e19521663269852a7dc52c38f1d4f84529cb1"
+  name = "github.com/badoux/checkmail"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9661bd69e9ad6fce1f7579022bdab0440807722a"
+  version = "v1.1"
+
+[[projects]]
   digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
@@ -97,6 +105,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/auth0/go-jwt-middleware",
+    "github.com/badoux/checkmail",
     "github.com/dgrijalva/jwt-go",
     "github.com/gorilla/mux",
     "github.com/jinzhu/gorm",

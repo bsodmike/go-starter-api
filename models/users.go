@@ -88,7 +88,7 @@ func (state *UserManager) AddUser(username, password, email string) *User {
 		Password: passwordHash,
 		Email:    email,
 		UUID:     guid.String(),
-		APIToken: uuid.NewV4().String(),
+		APIToken: guid.String(),
 	}
 	state.db.gormDB.Create(&user)
 	return user

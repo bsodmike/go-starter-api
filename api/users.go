@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/badoux/checkmail"
 	"github.com/bsodmike/go_starter_api/auth"
 	"github.com/bsodmike/go_starter_api/models"
 )
@@ -43,6 +44,12 @@ func (api *API) UserSignup(w http.ResponseWriter, req *http.Request) {
 
 	if api.users.HasUser(jsondata.Username) {
 		http.Error(w, "Username already exists", http.StatusBadRequest)
+		return
+	}
+
+	emailErr := checkmail.ValidateFormat(jsondata.Email)
+	if emailErr != nil {
+		http.Error(w, "Invalid email provided", http.StatusBadRequest)
 		return
 	}
 
