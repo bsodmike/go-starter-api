@@ -1,25 +1,15 @@
 package api
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/bsodmike/go_starter_api/models"
 )
 
-func AuthMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	// do some stuff before
-	next(rw, r)
-	// do some stuff after
-	fmt.Println("Finished API Auth Middleware")
-}
-
-// API -
+// API struct
 type API struct {
 	users *models.UserManager
 }
 
-// NewAPI -
+// NewAPI - Returns and instance of *API
 func NewAPI(db *models.DB) *API {
 
 	usermgr, _ := models.NewUserManager(db)

@@ -7,14 +7,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bsodmike/go_starter_api/api"
 	"github.com/bsodmike/go_starter_api/app"
+	"github.com/bsodmike/go_starter_api/routes"
 )
 
 var config app.Config
+var appApi api.API
 
 func TestMain(m *testing.M) {
 	config = app.Config{}
-	Setup(&config)
+	config.Router = routes.NewRoutes(&config, &appApi)
 
 	code := m.Run()
 	os.Exit(code)

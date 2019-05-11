@@ -16,6 +16,10 @@ type DB struct {
 	LogMode bool
 }
 
+func (d *DB) Close() {
+	defer d.Close()
+}
+
 func (d *DB) connect() *DB {
 	gormDB, err := gorm.Open("postgres", d.Source)
 
@@ -42,7 +46,6 @@ func (d *DB) connect() *DB {
 func NewPostgresDB(db *DB) *DB {
 
 	db.connect()
-	defer db.gormDB.Close()
 
 	if !(db.gormDB.HasTable(&User{})) {
 		db.gormDB.CreateTable(&User{})

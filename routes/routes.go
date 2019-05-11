@@ -1,37 +1,51 @@
 package routes
 
 import (
-	"encoding/json"
+	"fmt"
+	"html"
 	"net/http"
 
+	"github.com/bsodmike/go_starter_api/api"
 	"github.com/bsodmike/go_starter_api/app"
+	"github.com/bsodmike/go_starter_api/auth"
 	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
 )
 
-func InitializeRoutes(c *app.Config) {
+func authMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	err := auth.JwtMiddleware.CheckJWT(w, r)
+
+	// If there was an error, do not call next.
+	if err == nil && next != nil {
+		next(w, r)
+	} else {
+		fmt.Printf("Auth error=%s | %s %s | Remote %s\n", err.Error(), r.Method, html.EscapeString(r.URL.Path), r.RemoteAddr)
+	}
+}
+
+// NewRoutes - Create routes
+func NewRoutes(c *app.Config, appAPI *api.API) *mux.Router {
 	router := mux.NewRouter()
 	apiRoutes := mux.NewRouter()
-
-	c.Router = router
-	c.ApiRoutes = apiRoutes
 
 	// Health check
 	router.HandleFunc("/health-check", healthCheckHandler).Methods("GET")
 
-	// API
-	apiRouter := apiRoutes.PathPrefix("/api/v1").Subrouter().StrictSlash(true)
+	// Public API
+	publicAPIRouter := router.PathPrefix("/api/v1").Subrouter()
+	publicAPIRouter.HandleFunc("/", apiRootHandler).Methods("GET")
+
+	u := publicAPIRouter.PathPrefix("/user").Subrouter()
+	u.HandleFunc("/signup", appAPI.UserSignup).Methods("POST")
+
+	// API secured, requires JWT auth.
+	apiRouter := apiRoutes.PathPrefix("/api/v1/secured").Subrouter().StrictSlash(true)
 	apiRouter.HandleFunc("/", apiRootHandler).Methods("GET")
-}
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	router.PathPrefix("/api/v1/secured").Handler(negroni.New(
+		negroni.HandlerFunc(authMiddleware),
+		negroni.Wrap(apiRoutes),
+	))
 
-	json.NewEncoder(w).Encode(map[string]bool{"alive": true})
-}
-
-func apiRootHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusForbidden)
-
-	json.NewEncoder(w).Encode(make(map[string]string))
+	return router
 }

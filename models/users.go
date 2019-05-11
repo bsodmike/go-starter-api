@@ -36,7 +36,69 @@ func NewUserManager(db *DB) (*UserManager, error) {
 	return &usermgr, nil
 }
 
-func remove() {
-	bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
-	uuid.NewV4()
+// HasUser - Check if the given username exists.
+func (state *UserManager) HasUser(username string) bool {
+	if err := state.db.gormDB.Where("username=?", username).Find(&User{}).Error; err != nil {
+		return false
+	}
+	return true
+}
+
+// HasUserWithEmail - Check if the given username exists.
+func (state *UserManager) HasUserWithEmail(email string) bool {
+	if err := state.db.gormDB.Where("email=?", email).Find(&User{}).Error; err != nil {
+		return false
+	}
+	return true
+}
+
+// FindUser -
+func (state *UserManager) FindUser(username string) *User {
+	user := User{}
+	state.db.gormDB.Where("username=?", username).Find(&user)
+	return &user
+}
+
+// FindUserByUUID -
+func (state *UserManager) FindUserByUUID(uuid string) *User {
+	user := User{}
+	state.db.gormDB.Where("uuid=?", uuid).Find(&user)
+	return &user
+}
+
+func (state *UserManager) UpdateUser(user *User) *User {
+	state.db.gormDB.Save(user)
+	return user
+}
+
+// AddUser - Creates a user and hashes the password
+func (state *UserManager) AddUser(username, password, email string) *User {
+	passwordHash := state.HashPassword(username, password)
+	guid := uuid.NewV4()
+	user := &User{
+		Username: username,
+		Password: passwordHash,
+		Email:    email,
+		UUID:     guid.String(),
+		APIToken: uuid.NewV4().String(),
+	}
+	state.db.gormDB.Create(&user)
+	return user
+}
+
+// HashPassword - Hash the password (takes a username as well, it can be used for salting).
+func (state *UserManager) HashPassword(username, password string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		panic("Permissions: bcrypt password hashing unsuccessful")
+	}
+	return string(hash)
+}
+
+// CheckPassword - compare a hashed password with a possible plaintext equivalent
+func (state *UserManager) CheckPassword(hashedPassword, password string) bool {
+	if bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)) != nil {
+		return false
+	}
+	return true
 }
