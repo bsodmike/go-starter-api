@@ -17,3 +17,4 @@ func apiRootHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(make(map[string]string))
 }
+

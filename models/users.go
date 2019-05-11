@@ -66,6 +66,14 @@ func (state *UserManager) FindUserByUUID(uuid string) *User {
 	return &user
 }
 
+// FindUserByAccessToken -
+func (state *UserManager) FindUserByAccessToken(token string) *User {
+	user := User{}
+	state.db.gormDB.Where("api_token=?", token).Find(&user)
+	return &user
+}
+
+// UpdateUser - Saves the provided *User
 func (state *UserManager) UpdateUser(user *User) *User {
 	state.db.gormDB.Save(user)
 	return user

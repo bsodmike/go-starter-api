@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"strings"
 
 	"github.com/bsodmike/go_starter_api/api"
 	"github.com/bsodmike/go_starter_api/app"
@@ -14,6 +15,11 @@ import (
 
 func authMiddleware(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	err := auth.JwtMiddleware.CheckJWT(w, r)
+
+	if len(r.Header["Authorization"]) != 0 {
+		accessToken := strings.Split(r.Header["Authorization"][0], " ")[1]
+		fmt.Printf("Access Token used | %s\n", accessToken)
+	}
 
 	// If there was an error, do not call next.
 	if err == nil && next != nil {
@@ -41,6 +47,7 @@ func NewRoutes(c *app.Config, appAPI *api.API) *mux.Router {
 	// API secured, requires JWT auth.
 	apiRouter := apiRoutes.PathPrefix("/api/v1/secured").Subrouter().StrictSlash(true)
 	apiRouter.HandleFunc("/", apiRootHandler).Methods("GET")
+	apiRouter.HandleFunc("/userinfo", appAPI.UserInfo).Methods("GET")
 
 	router.PathPrefix("/api/v1/secured").Handler(negroni.New(
 		negroni.HandlerFunc(authMiddleware),

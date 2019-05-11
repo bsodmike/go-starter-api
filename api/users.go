@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bsodmike/go_starter_api/auth"
+	"github.com/bsodmike/go_starter_api/models"
 )
 
 // UserJSON - json data expected for login/signup
@@ -19,6 +20,15 @@ type Token struct {
 	AccessToken string `json:"access_token"`
 }
 
+func (t *Token) extractToken(jsontoken string) string {
+	tokenErr := json.Unmarshal([]byte(jsontoken), &t)
+	if tokenErr != nil {
+		log.Fatal(tokenErr)
+	}
+
+	return t.AccessToken
+}
+
 // UserSignup -
 func (api *API) UserSignup(w http.ResponseWriter, req *http.Request) {
 
@@ -26,13 +36,13 @@ func (api *API) UserSignup(w http.ResponseWriter, req *http.Request) {
 	jsondata := UserJSON{}
 	err := decoder.Decode(&jsondata)
 
-	if err != nil || jsondata.Username == "" || jsondata.Password == "" {
+	if err != nil || jsondata.Username == "" || jsondata.Password == "" || jsondata.Email == "" {
 		http.Error(w, "Missing username or password", http.StatusBadRequest)
 		return
 	}
 
 	if api.users.HasUser(jsondata.Username) {
-		http.Error(w, "username already exists", http.StatusBadRequest)
+		http.Error(w, "Username already exists", http.StatusBadRequest)
 		return
 	}
 
@@ -45,7 +55,7 @@ func (api *API) UserSignup(w http.ResponseWriter, req *http.Request) {
 
 	jsontoken := auth.GetJSONToken(user)
 
-	var token Token
+	token := Token{}
 	rawToken := token.extractToken(jsontoken)
 
 	user.APIToken = rawToken
@@ -55,11 +65,30 @@ func (api *API) UserSignup(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(jsontoken))
 }
 
-func (t *Token) extractToken(jsontoken string) string {
-	tokenErr := json.Unmarshal([]byte(jsontoken), &t)
-	if tokenErr != nil {
-		log.Fatal(tokenErr)
-	}
+// GetUserFromContext - return User reference from header token
+func (api *API) GetUserFromContext(req *http.Request) *models.User {
+	userclaims := auth.GetUserClaimsFromContext(req)
+	user := api.users.FindUserByUUID(userclaims["uuid"].(string))
+	return user
+}
 
-	return t.AccessToken
+// UserInfo - example to get
+func (api *API) UserInfo(w http.ResponseWriter, req *http.Request) {
+
+	user := api.GetUserFromContext(req)
+	js, _ := json.Marshal(user)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+}
+
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	respondWithJSON(w, code, map[string]string{"error": message})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
 }
