@@ -47,7 +47,10 @@ func NewRoutes(c *app.Config, appAPI *api.API) *mux.Router {
 	// API secured, requires JWT auth.
 	apiRouter := apiRoutes.PathPrefix("/api/v1/secured").Subrouter()
 	apiRouter.HandleFunc("/", apiRootHandler).Methods("GET")
-	apiRouter.HandleFunc("/userinfo", appAPI.UserInfo).Methods("GET")
+	apiRouter.HandleFunc("/userinfo", appAPI.UserInfoHandler).Methods("GET")
+
+	// Projects
+	apiRouter.HandleFunc("/projects", appAPI.ProjectsHandler).Methods("GET")
 
 	router.PathPrefix("/api/v1/secured").Handler(negroni.New(
 		negroni.HandlerFunc(authMiddleware),

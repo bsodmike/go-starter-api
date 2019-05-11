@@ -51,7 +51,17 @@ func NewPostgresDB(db *DB) *DB {
 		db.gormDB.CreateTable(&User{})
 	}
 
+	if !(db.gormDB.HasTable(&Project{})) {
+		db.gormDB.CreateTable(&Project{})
+	}
+
+	if !(db.gormDB.HasTable(&Note{})) {
+		db.gormDB.CreateTable(&Note{})
+	}
+
 	db.gormDB.AutoMigrate(&User{})
+	db.gormDB.AutoMigrate(&Project{})
+	db.gormDB.AutoMigrate(&Note{})
 
 	return db
 }

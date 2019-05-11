@@ -12,7 +12,7 @@ import (
 func main() {
 	config := app.Config{}
 
-	d := models.DB{Source: "host=localhost port=9001 user=dbuser dbname=goapi password=password sslmode=disable", LogMode: false}
+	d := models.DB{Source: "host=localhost port=9001 user=dbuser dbname=goapi password=password sslmode=disable", LogMode: true}
 	db := models.NewPostgresDB(&d)
 	appAPI := api.NewAPI(db)
 

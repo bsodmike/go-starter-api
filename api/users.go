@@ -80,8 +80,8 @@ func (api *API) GetUserFromContext(req *http.Request) *models.User {
 	return user
 }
 
-// UserInfo - Return user details as marshalled to JSON.
-func (api *API) UserInfo(w http.ResponseWriter, req *http.Request) {
+// UserInfoHandler - Return user details as marshalled to JSON.
+func (api *API) UserInfoHandler(w http.ResponseWriter, req *http.Request) {
 
 	user := api.GetUserFromContext(req)
 	jsonuser, _ := json.Marshal(user)
