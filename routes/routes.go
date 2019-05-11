@@ -45,7 +45,7 @@ func NewRoutes(c *app.Config, appAPI *api.API) *mux.Router {
 	u.HandleFunc("/signup", appAPI.UserSignup).Methods("POST")
 
 	// API secured, requires JWT auth.
-	apiRouter := apiRoutes.PathPrefix("/api/v1/secured").Subrouter().StrictSlash(true)
+	apiRouter := apiRoutes.PathPrefix("/api/v1/secured").Subrouter()
 	apiRouter.HandleFunc("/", apiRootHandler).Methods("GET")
 	apiRouter.HandleFunc("/userinfo", appAPI.UserInfo).Methods("GET")
 

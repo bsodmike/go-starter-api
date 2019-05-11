@@ -9,6 +9,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+// FIXME fetch env var for production use `os.Getenv("API_JWT_SIGNINGKEY")``
 // signingKey set up a global string for our secret
 var signingKey = []byte("knrjkevdckjh")
 
