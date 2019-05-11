@@ -79,13 +79,13 @@ func (api *API) GetUserFromContext(req *http.Request) *models.User {
 	return user
 }
 
-// UserInfo - example to get
+// UserInfo - Return user details as marshalled to JSON.
 func (api *API) UserInfo(w http.ResponseWriter, req *http.Request) {
 
 	user := api.GetUserFromContext(req)
-	js, _ := json.Marshal(user)
+	jsonuser, _ := json.Marshal(user)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	w.Write(jsonuser)
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
